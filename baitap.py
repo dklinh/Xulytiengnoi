@@ -1,8 +1,5 @@
 from tkinter import Tk, Label, Button, Text, filedialog, Menu, Frame
-import sys
-from tkinter.font import Font
 import tkinter as tk
-from tkinter import ttk
 import pyaudio
 import wave
 import os
@@ -45,7 +42,7 @@ def openFile():
         save_folder['text'] = file_name[:-3]
         with open(file_name[:-3]+"/Description.txt", "w", encoding='utf-8') as f:
             f.write('\n'.join(lines))
-        sentence['text'] = label_count['text'] + ".wav ---> " + text_label['text'].split('@@')[int(label_count['text'])]
+        sentence['text'] = label_count['text'] + ".wav\n\n" + text_label['text'].split('@@')[int(label_count['text'])]
 
 
 # Exit function
@@ -65,17 +62,12 @@ def record():
     if label_count['text'] != total_sens['text'] and label_count['text'] != '-1':
         save_label.pack_forget()
         buttonRec.pack_forget()
-        buttonPre.pack_forget()
-        buttonNext.pack_forget()
-        buttonPre.pack(side='left', padx=3)
-        buttonStop.pack(side='left', padx=3)
-        buttonNext.pack(side='left', padx=3)
+        buttonStop.pack(pady=1)
         stream = p.open(format=sample_format,
                         channels=channels,
                         rate=fs,
                         frames_per_buffer=chunk,
                         input=True)
-        print('Recording')
         frames = []  # Initialize array to store frames
         def listen():
             global end
@@ -100,9 +92,9 @@ def next_sen():
         label_count['text'] = str(int(label_count['text']) + 1)
         save_label['text'] = f"Saved {label_count['text']}.wav"
     if label_count['text'] == total_sens['text']:
-        sentence['text'] = "This is the end!"
+        sentence['text'] = "Kết thúc!"
     else:
-        sentence['text'] = label_count['text'] + ".wav ---> " + text_label['text'].split('@@')[int(label_count['text'])]
+        sentence['text'] = label_count['text'] + ".wav\n\n" + text_label['text'].split('@@')[int(label_count['text'])]
 
 def pre_sen():
     save_label.pack_forget()
@@ -110,42 +102,33 @@ def pre_sen():
         label_count['text'] = str(int(label_count['text']) - 1)
         save_label['text'] = f"Saved {label_count['text']}.wav"
     if label_count['text'] == '-1':
-        sentence['text'] = "This is the begining!"
+        sentence['text'] = "Bắt đầu!"
     else:
-        sentence['text'] = label_count['text'] + ".wav ---> " + text_label['text'].split('@@')[int(label_count['text'])]
+        sentence['text'] = label_count['text'] + ".wav\n\n" + text_label['text'].split('@@')[int(label_count['text'])]
 
 def stop():
     save_label.pack()
     print(save_label['text'])
     buttonStop.pack_forget()
-    buttonPre.pack_forget()
-    buttonNext.pack_forget()
-    buttonPre.pack(side='left', padx=3)
-    buttonRec.pack(side='left', padx=3)
-    buttonNext.pack(side='left', padx=3)
+    buttonRec.pack()
     
     global end
 
-    # Stop and close the stream 
-    print('Finished recording')
     end = True
 #Create window
 window = Tk()
-screen_width = window.winfo_screenwidth()
-screen_heihgt = window.winfo_screenheight()
-window.title("Recorder Speech Processing")
-window.geometry(f"800x300+{screen_width//2 - 400}+{screen_heihgt//2 - 250}")
+window.title("Speech Processing")
+window.geometry(f"900x400+300+300")
 window.resizable(0, 0)
-window.configure(background='white')
+window.configure()
 # Define font
-font = Font(family='Helvetica')
 #Add menuBar
 menuBar = Menu(window)
 window.config(menu=menuBar)
 fileMenu = Menu(menuBar)
-fileMenu.add_command(label="Open File", command=openFile)
+fileMenu.add_command(label="Open Text", command=openFile)
 fileMenu.add_command(label="Exit", command=onExit)
-menuBar.add_cascade(label="Options", menu=fileMenu)
+menuBar.add_cascade(label="Menu", menu=fileMenu)
 #Add a label to count sentence
 label_count = Label(text='0')
 total_sens = Label(text='0')
@@ -153,8 +136,7 @@ save_folder = Label()
 text_label = Label()
 save_label = Label(window, text=f"Saved {label_count['text']}.wav")
 
-sentence = Label(bg='white', wraplength=780, anchor='w', justify='left', height=12)
-sentence['font'] = font
+sentence = Label(wraplength=780, anchor='w', justify='left', height=12, font='30')
 sentence.pack(side='top')
 
 # create bottom frame to hold button
@@ -162,28 +144,19 @@ bottomframe = Frame(window)
 bottomframe.pack(side='bottom', pady=3)
 
 # Pre button
-buttonPre = Button(bottomframe, text="Previous", width=20, height=2, 
-                                relief='solid', fg='black', bg="yellow", command=pre_sen)
-buttonPre['font'] = font
-buttonPre.pack(side='left', padx=3)
+buttonPre = Button(bottomframe, text="Previous", width=20, height=1, command=pre_sen)
+buttonPre.pack(pady=1)
+# Next button
+buttonNext = Button(bottomframe, text="Next", width=20, height=1, command=next_sen)
+buttonNext.pack(pady=1)
+
 
 # Record button
-buttonRec = Button(bottomframe, text="Record", width=20, height=2, 
-                                relief='solid', fg='white', bg="#24b24e", command=record)
-buttonRec['font'] = font
-buttonRec.pack(side='left', padx=3)
+buttonRec = Button(bottomframe, text="Record", width=20, height=1, command=record)
+buttonRec.pack(pady=1)
 
 #Stop button
-buttonStop = Button(bottomframe, text="Stop", width=20, height=2, 
-                                    relief='solid', fg='white', bg="#a51e1a", command=stop)#24b24e
-buttonStop['font'] = font
-
-# Next button
-buttonNext = Button(bottomframe, text="Next", width=20, height=2, 
-                                relief='solid', fg='black', bg="yellow", command=next_sen)
-buttonNext['font'] = font
-buttonNext.pack(side='left', padx=3)
-
+buttonStop = Button(bottomframe, text="Stop", width=20, height=1, command=stop)#24b24e
 
 
 window.mainloop()
